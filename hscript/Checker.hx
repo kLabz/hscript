@@ -166,6 +166,33 @@ class CheckerTypes {
 					else
 						cl.fields.set(f.name, fl);
 				}
+
+				// TODO: PR that
+				for( f in c.statics ) {
+					var skip = false;
+					var complete = !StringTools.startsWith(f.name,"__"); // __uid, etc. (no metadata in such fields)
+					for( m in f.meta ) {
+						if( m.name == ":noScript"  ) {
+							skip = true;
+							break;
+						}
+						if( m.name == ":noCompletion" )
+							complete = false;
+					}
+					if( skip ) continue;
+					var fl : CField = { isPublic : f.isPublic, canWrite : f.set.match(RNormal | RCall(_) | RDynamic), complete : complete, params : [], name : f.name, t : null };
+					for( p in f.params ) { // TODO: double check that
+						var pt = TParam(p);
+						var key = f.name+"."+p;
+						pkeys.push(key);
+						fl.params.push(pt);
+						localParams.set(key, pt);
+					}
+					fl.t = makeXmlType(f.type);
+					while( pkeys.length > 0 )
+						localParams.remove(pkeys.pop());
+					cl.statics.set(f.name, fl);
+				}
 				localParams = null;
 			});
 			types.set(cl.name, CTClass(cl));
