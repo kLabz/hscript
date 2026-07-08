@@ -473,6 +473,7 @@ class Interp {
 				return r;
 			};
 			var f = Reflect.makeVarArgs(f);
+			f = wrapClosure(f);
 			if( name != null ) {
 				if( depth == 0 ) {
 					// global function
@@ -765,6 +766,11 @@ class Interp {
 
 	function call( o : Dynamic, f : Dynamic, args : Array<Dynamic> ) : Dynamic {
 		return Reflect.callMethod(o,f,args);
+	}
+
+	// Hook for subclasses to wrap freshly-created closures (default: identity).
+	function wrapClosure( f : Dynamic ) : Dynamic {
+		return f;
 	}
 
 	function cnew( cl : String, args : Array<Dynamic> ) : Dynamic {
